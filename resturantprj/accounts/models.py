@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
 
+
 # Create your models here.
 
 class UserManagerModel(BaseUserManager):
@@ -47,7 +48,7 @@ class UserModel(AbstractBaseUser):
     last_name = models.CharField(max_length=100)
     username = models.CharField(max_length=100 , unique=True)
     email = models.EmailField(unique=True)
-    role= models.PositiveSmallIntegerField(choices=ROLE_CHOICE   , null=True)
+    role= models.PositiveSmallIntegerField(choices=ROLE_CHOICE ,blank=True, null=True)
 
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
@@ -72,5 +73,23 @@ class UserModel(AbstractBaseUser):
     def has_module_perms(self , app_label):
         return True
 
+
+class UserProfileModel(models.Model):
+    user = models.OneToOneField(UserModel , on_delete=models.CASCADE ,blank=True , null=True)
+    profile_picture =models.ImageField(upload_to='users/profile_pictures' , blank=True , null=True)
+    cover_picture =models.ImageField(upload_to='users/cover_pictures' , blank=True , null=True)
+    address_line_1 = models.CharField(max_length=50 , blank=True , null=True)
+    address_line_2 = models.CharField(max_length=50 , blank=True , null=True)
+    country = models.CharField(max_length=30 , blank=True , null=True)
+    state = models.CharField(max_length=30 , blank=True , null=True)
+    city = models.CharField(max_length=30 , blank=True , null=True)
+    latitude=models.CharField(max_length=10 , blank=True , null=True)
+    longitude = models.CharField(max_length=10 , blank=True , null=True)
+    creat_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}"
     
+
 

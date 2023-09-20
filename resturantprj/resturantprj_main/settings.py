@@ -34,13 +34,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
+    'vendor',
     
 ]
 
@@ -132,7 +133,7 @@ STATIC_URL = 'static/'
 # STATIC_ROOT = BASE_DIR /"static"
 
 
-MEDIA_ROOT=BASE_DIR / "UploadMedia "
+MEDIA_ROOT=BASE_DIR /"UploadMedia"
 MEDIA_URL = "/files/"
 
 STATICFILES_DIRS = [

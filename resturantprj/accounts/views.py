@@ -3,7 +3,8 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.views import View
 from .forms import UserForm
-from .models import UserModel
+from .models import UserModel , UserProfileModel
+from vendor.forms import VendorForm
 from django.contrib import messages
 # Create your views here.
 
@@ -44,4 +45,43 @@ class RegisterUserView(View):
             'form' : form
         }
         return render(request , 'accounts/registeruser.html', context)
-        
+    
+
+class RegisterVendorView(View):
+    
+    def get(self ,request):
+        form = UserForm
+        vendorform = VendorForm
+
+        context={
+            'form' : form ,
+            'vendorform' : vendorform
+
+        }
+        return render(request , 'accounts/registervendor.html' , context)
+    
+    def post(self , request):
+        form = UserForm(request.POST)
+        vendorform = VendorForm(request.POST , request.FILES)
+        if form.is_valid() and vendorform.is_valid() :
+            password=form.cleaned_data['password']
+            user = form.save(commit=False)
+            user.set_password(password)
+            user.role= UserModel.RESTURANT
+            form.save()
+            vendor = vendorform.save(commit=False)
+            vendor.vendoruser = user
+            userprofile = UserProfileModel.objects.get(user = user)
+            vendor.vendor_profile = userprofile
+            vendor.save()
+            messages.success(request , 'Your account has been registered sucessfully ! , please wait for approval')
+            return redirect('registervendor')
+
+        else :
+            print(form.errors , vendorform.errors)
+            context={
+                'form' : form ,
+                'vendorform' : vendorform
+
+            }
+            return render(request , 'accounts/registervendor.html' , context)

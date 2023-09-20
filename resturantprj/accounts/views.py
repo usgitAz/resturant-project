@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.views import View
 from .forms import UserForm
 from .models import UserModel
+from django.contrib import messages
 # Create your views here.
 
 
@@ -24,6 +25,7 @@ class RegisterUserView(View):
             user.set_password(password)
             user.role= UserModel.CUSTOMER
             form.save()
+            messages.success(request , 'Your account has been registered sucessfully !')
             return redirect('registeruser')
             #method two :
             # firstname= form.cleaned_data["first_name"]
@@ -36,9 +38,7 @@ class RegisterUserView(View):
             # user.role= UserModel.CUSTOMER
             # user.save()
             # return redirect('registeruser')
-        else :
-            print('invalid !')
-            print(form.errors)
+        
 
         context ={
             'form' : form

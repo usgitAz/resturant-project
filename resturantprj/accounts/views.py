@@ -5,7 +5,7 @@ from django.views import View
 from .forms import UserForm
 from .models import UserModel , UserProfileModel
 from vendor.forms import VendorForm
-from django.contrib import messages
+from django.contrib import messages , auth
 # Create your views here.
 
 
@@ -85,3 +85,32 @@ class RegisterVendorView(View):
 
             }
             return render(request , 'accounts/registervendor.html' , context)
+
+
+class LoginView(View):
+    
+    def get(self, request):
+        return render(request , "accounts/login.html")
+    def post(self , request):
+        email = request.POST['email']
+        password = request.POST['password']
+        
+        authentication = auth.authenticate(email=email , password = password)
+        
+        if authentication is not None :
+            auth.login(request , authentication)
+            messages.success(request,"you login successfully !")
+            return redirect('dashboard')
+        
+        else :
+            messages.error(request , "Invalid informations !")
+            return redirect('login')
+            
+        
+def dashboard(request):
+    return render(request ,'accounts/dashboard.html')
+
+def logout(request):
+    auth.logout(request)
+    messages.info( request,'you are logged out !')
+    return redirect('login')

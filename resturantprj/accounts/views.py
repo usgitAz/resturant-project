@@ -6,6 +6,8 @@ from .forms import UserForm
 from .models import UserModel , UserProfileModel
 from vendor.forms import VendorForm
 from django.contrib import messages , auth
+from .Utils import DetectUser , check_role_customer , check_role_vendor
+from django.contrib.auth.decorators import login_required , user_passes_test
 # Create your views here.
 
 
@@ -15,7 +17,10 @@ class RegisterUserView(View):
         'form' : form
     }
     def get(self ,request):
-        return render(request , 'accounts/registeruser.html', self.context)
+            if request.user.is_authenticated:
+                messages.info(request , "you are already logged in !")
+                return redirect("myaccount")
+            return render(request , 'accounts/registeruser.html', self.context)
     
     def post(self , request):
         form = UserForm(request.POST)
@@ -50,6 +55,9 @@ class RegisterUserView(View):
 class RegisterVendorView(View):
     
     def get(self ,request):
+        if request.user.is_authenticated:
+            messages.info(request , "you are already logged in !")
+            return redirect("myaccount")
         form = UserForm
         vendorform = VendorForm
 
@@ -90,7 +98,11 @@ class RegisterVendorView(View):
 class LoginView(View):
     
     def get(self, request):
+        if request.user.is_authenticated:
+            messages.info(request , "you are already logged in !")
+            return redirect("myaccount")
         return render(request , "accounts/login.html")
+    
     def post(self , request):
         email = request.POST['email']
         password = request.POST['password']
@@ -100,17 +112,31 @@ class LoginView(View):
         if authentication is not None :
             auth.login(request , authentication)
             messages.success(request,"you login successfully !")
-            return redirect('dashboard')
+            return redirect('myaccount')
         
         else :
             messages.error(request , "Invalid informations !")
             return redirect('login')
-            
-        
-def dashboard(request):
-    return render(request ,'accounts/dashboard.html')
 
 def logout(request):
     auth.logout(request)
     messages.info( request,'you are logged out !')
-    return redirect('login')
+    return redirect('login')            
+
+@login_required(login_url='login')
+def MyAccount(request):
+    user = request.user
+    redirecturl = DetectUser(user)
+    return redirect(redirecturl)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_customer)
+def CDashBoard(request):
+    return render(request , 'accounts/cdashboard.html')
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def VDashBoard(request):
+    return render(request , 'accounts/vdashboard.html')

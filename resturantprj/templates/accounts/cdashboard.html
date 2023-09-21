@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer dashboard {% endblock title %}
+
+{% block content %}
+{% include 'includes/alert.html' %}
+<h2>this is {{user.username}}</h2>
+<h3>this is {{user.get_role}}</h3>
+{% endblock content %}

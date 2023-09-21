@@ -38,10 +38,10 @@ class UserManagerModel(BaseUserManager):
 
 
 class UserModel(AbstractBaseUser):
-    RESTURANT = 1
+    VENDOR = 1
     CUSTOMER = 2
     ROLE_CHOICE = (
-        (RESTURANT , 'resturant'),
+        (VENDOR , 'vendor'),
         (CUSTOMER , 'customer')
     )
     first_name = models.CharField(max_length=100)
@@ -72,8 +72,13 @@ class UserModel(AbstractBaseUser):
     
     def has_module_perms(self , app_label):
         return True
-
-
+    
+    def get_role(self):
+        if self.role == 1 :
+            return "vendor"
+        else :
+            return "customer"
+        
 class UserProfileModel(models.Model):
     user = models.OneToOneField(UserModel , on_delete=models.CASCADE ,blank=True , null=True)
     profile_picture =models.ImageField(upload_to='users/profile_pictures' , blank=True , null=True)

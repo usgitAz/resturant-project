@@ -1,0 +1,11 @@
+{% autoescape off %}
+
+hi {{user.first_name}}
+
+{% if is_approved %}
+    your resturant approved by our admins . enjoy to sell your product in our site 
+{% else %}
+    we are sorry your Vendor account suspend by our admins ! please contact to us for more informations ! 
+{% endif %}
+
+{% endautoescape %}

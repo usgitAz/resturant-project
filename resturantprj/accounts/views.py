@@ -6,8 +6,10 @@ from .forms import UserForm
 from .models import UserModel , UserProfileModel
 from vendor.forms import VendorForm
 from django.contrib import messages , auth
-from .Utils import DetectUser , check_role_customer , check_role_vendor
+from .Utils import DetectUser , check_role_customer , check_role_vendor , send_verification_email , send_reset_password_email
 from django.contrib.auth.decorators import login_required , user_passes_test
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
 # Create your views here.
 
 
@@ -31,7 +33,9 @@ class RegisterUserView(View):
             user.set_password(password)
             user.role= UserModel.CUSTOMER
             form.save()
-            messages.success(request , 'Your account has been registered sucessfully !')
+            #send email verification 
+            send_verification_email(request , user)
+            messages.success(request , 'Your account has been registered sucessfully ! , wait for email to activate your account.')
             return redirect('registeruser')
             #method two :
             # firstname= form.cleaned_data["first_name"]
@@ -75,13 +79,15 @@ class RegisterVendorView(View):
             password=form.cleaned_data['password']
             user = form.save(commit=False)
             user.set_password(password)
-            user.role= UserModel.RESTURANT
+            user.role= UserModel.VENDOR
             form.save()
             vendor = vendorform.save(commit=False)
             vendor.vendoruser = user
             userprofile = UserProfileModel.objects.get(user = user)
             vendor.vendor_profile = userprofile
             vendor.save()
+            #send email verification 
+            send_verification_email(request , user)
             messages.success(request , 'Your account has been registered sucessfully ! , please wait for approval')
             return redirect('registervendor')
 
@@ -93,6 +99,25 @@ class RegisterVendorView(View):
 
             }
             return render(request , 'accounts/registervendor.html' , context)
+
+def activate(request , uidb64 , token):
+    #activated with is_active to True 
+    try :
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = UserModel._default_manager.get(pk = uid)
+    
+    except(ValueError , TypeError , OverflowError , UserModel.DoesNotExist) :
+        user = None
+        
+    if user is not None and default_token_generator.check_token(user , token):
+        user.is_active = True
+        user.save()
+        messages.success(request , "your email address and account have been confirmed !")
+        return redirect('myaccount')
+
+    else :
+        messages.error(request , 'invalid link or token ! try again .')
+        return redirect("myaccount")
 
 
 class LoginView(View):
@@ -140,3 +165,61 @@ def CDashBoard(request):
 @user_passes_test(check_role_vendor)
 def VDashBoard(request):
     return render(request , 'accounts/vdashboard.html')
+
+class forgot_password(View):
+    def get(self , request):
+        return render(request , 'accounts/forgot_password.html')
+    
+    def post(self , request):
+        email = request.POST['email']
+
+        if UserModel.objects.filter(email = email).exists():
+            user = UserModel.objects.get(email__exact = email)
+
+            #send reset email 
+            send_reset_password_email(request , user)
+
+            messages.success(request , "Reset Password Link send to your email !")
+            return redirect('login')
+        else :
+            messages.warning(request , "Your Email It doesn't exist yet ")
+            return redirect("forgot_password")
+
+def reset_password_validate(request , uidb64 , token):
+    try :
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = UserModel._default_manager.get(pk = uid)
+    
+    except(ValueError , TypeError , OverflowError , UserModel.DoesNotExist) :
+        user = None
+        
+    if user is not None and default_token_generator.check_token(user , token):
+        request.session['uid'] = uid 
+        messages.info(request , 'please reset your password')
+        return redirect('reset_password')
+    else :
+        messages.error(request , 'This link has been expired !')
+        return redirect('login')
+
+
+class reset_password(View):
+
+    def get(self , request):
+        return render(request , 'accounts/reset_password.html')
+    
+    def post(self , request):
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        if password == confirm_password :
+            uid = request.session.get('uid')
+            user = UserModel.objects.get(pk = uid)
+            user.set_password(password)
+            user.is_active = True
+            user.save()
+            messages.success(request , "The password was changed !")
+            return redirect('login')
+        else :
+            messages.error(request , 'password do not match')
+            return redirect('reset_password')
+

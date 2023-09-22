@@ -145,9 +145,25 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#configure django messages 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS={
     messages.ERROR : 'danger' ,
     messages.SUCCESS : 'success' ,
     messages.WARNING : 'warning'
 }
+
+#Email configuration 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp-mail.outlook.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'djtestaz@outlook.com'
+# EMAIL_HOST_PASSWORD = 'djpass8dj'
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = '70d49938e068d7'
+EMAIL_HOST_PASSWORD = 'fc34d32881782a'
+EMAIL_PORT = '2525'
+DEFAULT_FROM_EMAIL = 'Food online marketplace <test>'

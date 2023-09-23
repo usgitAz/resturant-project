@@ -1,8 +1,10 @@
-from django.urls import path
+from django.urls import path , include
 from . import views
 
 
+
 urlpatterns = [
+    path('' ,views.MyAccount ),
     path('registeruser/' , views.RegisterUserView.as_view(), name='registeruser'),
     path('registervendor/' , views.RegisterVendorView.as_view(), name='registervendor'),
     path('login/' , views.LoginView.as_view() , name='login'),
@@ -13,6 +15,6 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/' , views.activate , name='activate'),
     path('forgot_password/' , views.forgot_password.as_view() , name='forgot_password'),
     path('reset_password_validate/<uidb64>/<token>/' , views.reset_password_validate , name='reset_password_validate',),
-    path('reset_password' , views.reset_password.as_view() , name='reset_password') 
-    
+    path('reset_password' , views.reset_password.as_view() , name='reset_password') ,
+    path('vendor/' , include('vendor.urls')),
 ]

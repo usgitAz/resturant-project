@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from django import forms
-from .models import UserModel
+from .models import UserModel , UserProfileModel
+from .validators import allow_only_images_validator
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -36,3 +37,26 @@ class UserForm(forms.ModelForm):
 
         if password != confirm_password :
             raise forms.ValidationError('Password dosent match !')
+
+
+class UserProfileForm(forms.ModelForm):
+    # set css class to form input
+    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Start Typing...', 'required': 'required'}))
+    profile_picture = forms.FileField(widget=forms.FileInput(attrs={'readonly':'readonly'}) , validators=[allow_only_images_validator])
+    cover_picture = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn.btn-info'}) , validators=[allow_only_images_validator])
+
+    latitude = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    longitude = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    class Meta:
+        model = UserProfileModel
+        exclude = ['user' , 'creat_at' , 'modified_at']
+        error_messages = {
+        
+        }
+        
+
+    def __init__ (self , *args, **kwargs):
+        super(UserProfileForm , self ).__init__(*args, **kwargs)
+        for field in self.fields:
+            if field  == 'latitude' or field == 'longtitude':
+                self.fields[field].widget.attrs['readonly'] = 'readonly'

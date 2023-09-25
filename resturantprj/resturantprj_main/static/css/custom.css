@@ -16,10 +16,8 @@
     padding: 15px;
 }
 
-.btn.btn-info {
-    background-color: #f6f6f6;
-    color: #000;
-    cursor: pointer;
+.btn {
+    padding: 2px 1.75em;
     font-size: 12px;
-    border: 1px solid #c5c5c5;
+    cursor: pointer;
 }

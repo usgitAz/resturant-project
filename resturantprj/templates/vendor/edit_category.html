@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Menu Builder{% endblock title %}
+{% block content %}
+{% include 'includes/alert.html' %}
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    {% include 'includes/V-sidebar.html' %}
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h4 class='text-uppercase'>Build Your food menu</h4>
+                                <hr>
+                           
+                            <h6>Edit your Category</h6>
+                            <span>
+                                <button class="btn-secondary btn float-left" onclick="history.back()"><i class="fas fa-angle-left"></i> Back</button>
+                            </span>
+                            <form action="{% url 'edit_category' category.id %}" method="POST" class="mt-5">
+                                {% csrf_token %}
+                                <div class="form-fields-set">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Category Name * </label>
+                                                {{ form.category_name}}
+                                                <h6 class='text-danger'>{{form.category_name.errors}}</h6>
+                                            </div>
+                                        </div>
+                                    
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Descreption</label>
+                                                {{ form.description }}
+                                                {{ form.description.errors }}
+
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-info float-right mb-1 ml-3"><i class="fa fa-check" aria-hidden="true"></i>&MediumSpace; UpdateCategory</button>
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

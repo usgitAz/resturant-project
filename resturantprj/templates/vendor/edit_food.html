@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Menu Builder{% endblock title %}
+{% block content %}
+{% include 'includes/alert.html' %}
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    {% include 'includes/V-sidebar.html' %}
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h4 class='text-uppercase'>Build Your food menu</h4>
+                                <hr>
+                           
+                            <h6>Edit your FoodItems</h6>
+                            <span>
+                                <button class="btn-secondary btn float-left" onclick="history.back()"><i class="fas fa-angle-left"></i> Back</button>
+                            </span>
+                            <form action="{% url 'edit_food' food.id %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-fields-set">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Select Category * </label>
+                                                {{form.category}}
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Enter Food Title * </label>
+                                                {{form.food_title}}
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Enter Descreption * </label>
+                                                {{form.description}}
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Choise a picture  * </label>
+                                                {{form.image}}
+                                                <img src="{{food.image.url}}" alt="food image" width="100" class='ml-2'>
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Food price  * </label>
+                                                {{form.price}}
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="field-holder">
+                                                <label>Food available * </label>
+                                                {{form.is_available}}
+                                                <h6 class='text-danger'>{{form.category.errors}}</h6>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-info float-right mb-1 ml-3"><i class="fa fa-check" aria-hidden="true"></i>&MediumSpace; Add Category</button>
+                                        <button type="button" class="btn btn-info float-right mb-1 ml-3"><a href="{% url 'delete_food' food.id %}" style='color: unset; text-decoration: unset;'   onclick="return confirm('Are you sure you want to delete this food item ?')"> <i class="fa fa-trash " aria-hidden="true"></i> Delete </a></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

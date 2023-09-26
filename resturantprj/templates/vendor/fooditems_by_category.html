@@ -28,10 +28,16 @@
                                             <th class='text-left'>{{forloop.counter}}</th>
                                             <td class='text-left'><img src="{{food.image.url}} " alt="food image" width='40'> </td>
                                             <td class='text-left'>
-                                                <a href=""><p class='mb-0 font-weight-bold'>{{food}}</p>
+                                                <a href="{% url 'edit_food' food.id %}"><p class='mb-0 font-weight-bold'>{{food}}</p>
                                                 <small class='text-muted'>{{food.description}}</small></a>
                                             </td>
-                                            <td><a href="{% url 'edit_food' food.id %}" style='color: unset;' > <i class="fa fa-edit" aria-hidden="true"></i></a>&MediumSpace; <a href="{% url 'delete_food' food.id %}" onclick="return confirm('Are you sure you want to delete this food item ?')"> <i class="fa fa-trash text-danger" aria-hidden="true"></i></a></td>
+                                            {% if food.is_available %}
+                                                <td><span class="badge badge-success">Available</span></td>
+                                            {% else %}
+                                                <td><span class="badge badge-danger">No Available</span></td>
+                                            {% endif %}
+                                            <td><a href="{% url 'edit_food' food.id %}" style='color: unset; padding: 1rem;' > <i class="fa fa-edit " aria-hidden="true"></i></a> <a href="{% url 'delete_food' food.id %}" onclick="return confirm('Are you sure you want to delete this food item ?')"> <i class="fa fa-trash text-danger mr-2" aria-hidden="true"></i></a></td>
+                                            
                                             </tr>
                                         {% endfor %}
                                   {% else %}

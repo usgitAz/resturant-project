@@ -21,3 +21,7 @@
     font-size: 12px;
     cursor: pointer;
 }
+
+.errorlist{
+    color: #af3e3e;
+}

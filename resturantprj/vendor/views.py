@@ -148,6 +148,9 @@ def add_food(request):
             print(form.errors)
     else:
         form = FoodItemForm()
+        #modify this form to show only query to vendor queries
+        form.fields['category'].queryset = CategoryModel.objects.filter(vendor = VendorModel.objects.get(vendoruser = request.user))
+         
     centext ={
         'form':form
     }
@@ -174,7 +177,10 @@ def edit_food(request , pk):
             # }
             # return render(request , 'vendor/add_category.html' , context)
             print(form.errors)
-    form = FoodItemForm(instance=fooditems)
+    else :
+        form = FoodItemForm(instance=fooditems)
+        form.fields['category'].queryset = CategoryModel.objects.filter(vendor = VendorModel.objects.get(vendoruser = request.user))
+        
     context ={
         'form' : form,
         'food' : fooditems

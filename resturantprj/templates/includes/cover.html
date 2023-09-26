@@ -1,5 +1,5 @@
 {% load static %}
-<div class="page-section restaurant-detail-image-section" style=" background: url({{vendor.vendor_profile.cover_picture.url}}) no-repeat scroll 0 0 / cover;">
+<div class="page-section restaurant-detail-image-section" style=" background: url({% if vendor.vendor_profile.cover_picture %}{{vendor.vendor_profile.cover_picture.url}} {% else %}{% static 'images/default-cover.PNG' %}  {% endif %}) no-repeat scroll 0 0 / cover;">
     <!-- Container Start -->
     <div class="container">
         <!-- Row Start -->
@@ -9,16 +9,25 @@
                 <div class="company-info-detail">
                     <div class="company-info">
                         <div class="img-holder">
-                            <figure>
-                                <img src="{{vendor.vendor_profile.profile_picture.url}}" alt="">
-                            </figure>
+                            {% if vendor.vendor_profile.profile_picture %}
+                                <figure>
+                                    <img src="{{vendor.vendor_profile.profile_picture.url}}" alt="">
+                                </figure>
+                            {% else %}
+                                <figure>
+                                    <img src="{% static 'images/default-profile.PNG' %}" alt="">
+                                </figure>
+                            {% endif %}
                         </div>
 
                         <div class="text-holder">
                             <span class="restaurant-title">{{vendor.vendor_name}}</span>
                             <div class="text">
-                                <i class="icon-location"></i>
-                                <p>{{vendor.vendor_profile.address}}</p>
+                                
+                                {% if vendor.vendor_profile.address %}
+                                    <i class="icon-location"></i>
+                                    <p>{{vendor.vendor_profile.address}}</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

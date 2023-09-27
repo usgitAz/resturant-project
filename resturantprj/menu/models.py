@@ -19,7 +19,7 @@ class CategoryModel(models.Model):
 
 class FooditemModel(models.Model):
     vendor = models.ForeignKey(VendorModel , on_delete=models.CASCADE)
-    category= models.ForeignKey(CategoryModel,  on_delete=models.CASCADE)
+    category= models.ForeignKey(CategoryModel,  on_delete=models.CASCADE , related_name='fooditems')
     food_title = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100 , unique=True)
     price = models.DecimalField(max_digits=10 , decimal_places=2)

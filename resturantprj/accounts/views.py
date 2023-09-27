@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required , user_passes_test
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from vendor.models import VendorModel
+from django.template.defaultfilters import slugify
 # Create your views here.
 
 
@@ -84,6 +85,9 @@ class RegisterVendorView(View):
             form.save()
             vendor = vendorform.save(commit=False)
             vendor.vendoruser = user
+            get_vendor_username =form.cleaned_data['username']
+            print(get_vendor_username)
+            vendor.vendor_slug = slugify(get_vendor_username)
             userprofile = UserProfileModel.objects.get(user = user)
             vendor.vendor_profile = userprofile
             vendor.save()

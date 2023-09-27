@@ -3,9 +3,9 @@
     <!-- Header Start -->
     <header id="header">
         <div class="main-header">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                    <div class="col-lg-5 col-md-5d col-sm-12 col-xs-12">
                         <div class="logo">
                             <figure>
                                 <a href="{% url 'mainpage' %}" class="light-logo">
@@ -26,14 +26,15 @@
                             </ul>
                             </div>
                     </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="col-lg-7 col-md-7x col-sm-12 col-xs-12">
                         <div class="login-option">
+                            <a href="{% url 'marketplace' %}"  class="btn btn-outline-danger text-uppercase font-weight-bold " >MarketPlace</a>
                             {% if user.is_authenticated   %}
                                 <a class="cs-color cs-popup-joinus-btn login-popup" href="{% url 'myaccount' %}">My Account </a>
                                 <a class="cs-color cs-popup-joinus-btn login-popup text-danger" href="{% url 'logout' %}">Logout </a>
                             {% else %}
                                <a class="cs-color cs-popup-joinus-btn login-popup" href="{% url 'login' %}">Login / </a>
-                                <span><a href="{% url 'registeruser' %}" class="cs-color cs-popup-joinus-btn login-popup ml-0" >Register</a> </span> <a class="get-start-btn" href="{% url 'registervendor' %}">
+                                <span><a href="{% url 'registeruser' %}" class="cs-color cs-popup-joinus-btn login-popup " >Register</a> </span> <a class="get-start-btn" href="{% url 'registervendor' %}">
                                 Register
                                 Restaurant </a>
 

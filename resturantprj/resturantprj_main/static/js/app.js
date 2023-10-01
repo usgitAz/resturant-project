@@ -3,7 +3,7 @@
 const myAPIKey = "3e282e3ccac9457f840beaad8053da7c";
 
 const streetInput = new autocomplete.GeocoderAutocomplete(
-  document.getElementById("street"),
+  document.getElementById("address"),
   myAPIKey, {
     allowNonVerifiedHouseNumber: true,
     allowNonVerifiedStreet: true,

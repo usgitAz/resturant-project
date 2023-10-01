@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@geoapify/geocoder-autocomplete": "^2.0.1"
+  }
+}

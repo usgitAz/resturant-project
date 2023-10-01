@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'vendor',
     'menu',
     'marketplace',
+    'django.contrib.gis',
     
 ]
 
@@ -89,7 +90,8 @@ WSGI_APPLICATION = 'resturantprj_main.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE' : 'django.contrib.gis.db.backends.postgis',
         'NAME': config('db_name'), 
         'USER': config('db_user'),
         'PASSWORD': config('db_password'),

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
 
+from django.contrib.gis.db import models as gismodels
+from django.contrib.gis.geos import Point
 
 # Create your models here.
 
@@ -89,6 +91,7 @@ class UserProfileModel(models.Model):
     city = models.CharField(max_length=30 , blank=True , null=True)
     latitude=models.CharField(max_length=10 , blank=True , null=True)
     longitude = models.CharField(max_length=10 , blank=True , null=True)
+    location = gismodels.PointField(blank=True , null=True , srid=4326)
     creat_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -96,5 +99,11 @@ class UserProfileModel(models.Model):
     def __str__(self):
         return f"{self.user.username}"
     
+    def save(self , *args, **kwargs):
+        if self.latitude and self.longitude :
+            #first we should ad  long then add lat here
+            self.location = Point(float(self.longitude ), float(self.latitude) ) #long and lat muset be float
+            return super(UserProfileModel , self).save(*args, **kwargs)
+        return super(UserProfileModel , self).save(*args, **kwargs)
 
-
+        

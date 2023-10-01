@@ -3,6 +3,7 @@
 
 {% block title %} Main Page{% endblock title %} 
 {% block content %}
+{% include 'includes/alert.html' %}
 		<!-- Main Section Start -->
 		<div class="main-section">
 			<!-- Home Pages Elements Strat -->
@@ -25,7 +26,7 @@
 									<div class="row">
 										<div class="col-lg-4 col-md-4 col-sm-3 col-xs-12">
 											<div class="field-holder">
-												<input type="text" name="resturant_name" placeholder="Resturant name">
+												<input type="text" name="keyword" placeholder="Resturant name or Food name">
 											</div>
 										</div>
 										<div class="col-lg-4 col-md-4 col-sm-5 col-xs-12">
@@ -34,9 +35,10 @@
 													<li class="select-location">
 														<div class="foodbakery-locations-fields-group foodbakery-focus-out">
 															<span class="foodbakery-search-location-icon"><i class="icon-location"></i></span>
-															<input type="text" name="address" class="location-field-text filter" id="id_address" required placeholder="All Locations">
-															<input type="hidden" name="lat" value="">
-															<input type="hidden" name="long" value="">
+															<div type="text" name="address" class="address-field autocomplete-container" id="id_address" required placeholder="All Locations"> </div>
+															<input type="hidden" name="address" id="address">
+															<input type="hidden" name="lat" id="id_latitude" value="">
+															<input type="hidden" name="long" id="id_longitude" value="">
 														</div>
 													</li>
 												</ul>

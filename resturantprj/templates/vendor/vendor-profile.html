@@ -105,11 +105,17 @@
                                                                 {{vendor_form.vendor_name}}
 															</div>
 														</div>
+														
+														<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+															<label for="street">api auto complate :</label><br>
+														<div id="street" class="address-field autocomplete-container"></div>
+													
+														</div>
 														<label class="text-danger">{{vendor_form.vendor_name.errors}}</label>
                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 															<div class="field-holder">
 																<label>Adress *</label>
-                                                                {{profile_form.address}}
+																{{profile_form.address}}
 															</div>
 														</div>
 														
@@ -171,4 +177,52 @@
     </div>
 </div>
 
+{% comment %} <div class="address-collection-container">
+	<div class="address-row">
+	  <div class="address-field-with-label main-part  margin-right">
+		<label for="street">Street:</label><br>
+		<div id="street" class="address-field autocomplete-container"></div>
+	  </div>
+<!-- 	  
+	  <div class="address-field-with-label">
+		<label for="housenumber">House number:</label><br>
+		<input id="housenumber" class="geoapify-autocomplete-input small-input"/>
+	  </div>
+	</div>
+  
+	<div class="address-row">
+	  <div class="address-field-with-label main-part">
+		<label for="address-additional">Apartment, suite (optional):</label><br>
+		<input id="address-additional" class="geoapify-autocomplete-input"/>
+	  </div>
+	</div>
+  
+	<div class="address-row">
+	
+	  <div class="address-field-with-label main-part  margin-right">
+		<label for="city">City:</label><br>
+		<div id="city" class="address-field autocomplete-container"></div>
+	  </div>
+	
+	  <div class="address-field-with-label">
+		<label for="postcode">ZIP code:</label><br>
+		<input id="postcode" class="geoapify-autocomplete-input small-input"/>
+	  </div>
+	</div>
+  
+	<div class="address-row">  
+	  <div class="address-field-with-label main-part  margin-right">
+		<label for="state">State:</label><br>
+		<div id="state" class="address-field autocomplete-container"></div>
+	  </div>
+	
+	  <div class="address-field-with-label main-part">
+		<label for="country">Country:</label><br>
+		<div id="country" class="address-field autocomplete-container"></div>
+	  </div>
+	</div> -->
+<!--   
+	<div id="message" class="message-container"></div>
+	<div class="button-container"><button onclick="checkAddress()">Check address</button></div> -->
+  </div> {% endcomment %}
 {% endblock content %}

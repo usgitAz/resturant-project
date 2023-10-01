@@ -122,3 +122,8 @@ def delete_cart(request,cart_id):
             return JsonResponse({'status':'failed' , 'message' : "Invalid Request !"})
     else :
         return JsonResponse({'status':'login_required' , 'message' : "Please Login to Continue"})
+    
+
+
+def search(request):
+    return HttpResponse('test')

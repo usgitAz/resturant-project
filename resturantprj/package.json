@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@geoapify/geocoder-autocomplete": "^2.0.1",
     "sweetalert2": "^11.7.31"
   }
 }

@@ -18,8 +18,8 @@
                             <ul>
                                 <li class="location-has-children choose-location">
                                     <form action="#">
-                                        <input type="text" value="" name="location" placeholder="Enter your delivery location" autocomplete="off">
-                                        <span id="foodbakery_radius_location_open" class="foodbakery-radius-location"><i class="icon-target5"></i></span>
+                                        <input type="text" value="" name="location" id="location" placeholder="Enter your current location" autocomplete="off">
+                                        <span id="foodbakery_radius_location_open" class="foodbakery-radius-location" onclick="getLocation()" ><i class="icon-target5"></i></span>
                                     </form>
                                     
                                 </li>
@@ -52,3 +52,38 @@
             </div>
         </div>
     </header>
+    <script>
+        var x = document.getElementById("location");
+        var current_location = sessionStorage.getItem("current_location");
+        if(current_location != ""){
+            x.value = current_location;
+        }
+        function getLocation() {
+            fetch('https://api.geoapify.com/v1/ipinfo?apiKey=3e282e3ccac9457f840beaad8053da7c')
+            .then(response => response.json())
+            .then(data => {
+                var lat = data.location.latitude
+                var lon = data.location.longitude
+                url = "https://api.geoapify.com/v1/geocode/reverse?lat="+lat+"&lon="+lon+"&format=json&apiKey=3e282e3ccac9457f840beaad8053da7c"
+                $.ajax({
+                    url : url,
+                    type : "GET",
+                    success:function(response){
+                        var address_line1 = response.results[0].address_line1
+                        var address_line2 = response.results[0].address_line2
+                        var current_location = address_line1 + address_line2
+                        x.value = current_location
+                        sessionStorage.setItem("current_location" , current_location)
+                        window.location= "?lat="+lat+"&lng="+lon
+                    }
+                })
+                
+                
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+       
+    
+        </script>

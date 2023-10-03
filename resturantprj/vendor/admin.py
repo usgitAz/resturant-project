@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import VendorModel
+from .models import VendorModel , OpeningHourModel
 # Register your models here.
 
 class VendorAdmin(admin.ModelAdmin):
@@ -7,4 +7,8 @@ class VendorAdmin(admin.ModelAdmin):
     ordering = ("-created_at" , )
     list_editable = ('is_approved' ,)
 
+class OpeningHourAdmin(admin.ModelAdmin):
+     list_display = ('vendor' , 'day' , 'from_hour', 'to_hour')
+
 admin.site.register(VendorModel , VendorAdmin)
+admin.site.register(OpeningHourModel ,OpeningHourAdmin )

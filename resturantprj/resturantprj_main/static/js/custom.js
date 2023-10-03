@@ -160,4 +160,74 @@ $(document).ready(function(){
         }
     }
     
+
+    //add hour in opening hours
+
+    $('.add_hour').on('click' , function(e){
+        e.preventDefault();
+        var day = document.getElementById('id_day').value;
+        var for_hour = document.getElementById('id_from_hour').value;
+        var to_hour = document.getElementById('id_to_hour').value;
+        var is_closed = document.getElementById('id_is_closed').checked ;//return true or false
+        var csrf_token = $('input[name=csrfmiddlewaretoken]').val();
+        var url = document.getElementById('add_url').value;
+
+
+        if(is_closed){
+            is_closed = 'True' ; // true in python is True
+            condition= "day != ''" ;
+        }else{
+            is_closed = 'False';
+            condition = "day != '' && for_hour != '' && to_hour != '' "
+        }
+
+
+        if(eval(condition) ){
+            $.ajax({
+                type : 'POST',
+                url : url , 
+                data : {
+                    'day' : day,
+                    'from_hour':for_hour,
+                    'to_hour' : to_hour,
+                    'is_closed' : is_closed,
+                    'csrfmiddlewaretoken':csrf_token,
+                },
+                success : function(response){
+                    if (response.status == 'success'){
+                        if(response.is_closed == 'Closed'){
+                            html = '<tr id="hour-'+response.id+'"><td><b>'+ response.day +'</b></td><td>'+ 'Closed' +'</td><td><a href="#" class="remove_hour" data-url="/vendor/opening_hours/remove/'+response.id+'/">Remove</a></td></tr>' 
+                        }
+                        else{
+                            html = '<tr id="hour-'+response.id+'"><td><b>'+ response.day +'</b></td><td>'+response.from_hour +'-'+response.to_hour+'</td><td><a href="#" class="remove_hour" data-url="/vendor/opening_hours/remove/'+response.id+'/">Remove</a></td></tr>'
+                        }
+                        $('.opening_hours').append(html)
+                        document.getElementById("form_hour").reset()
+                    }
+                    else{
+                        swal.fire(response.message , '', 'error')
+                    }
+                }
+            })
+        }else{
+            Swal.fire("fill all inputs" , '' , 'info')
+        }
+
+    })
+    
+    //delete the hour in opening hours 
+    $(document).on('click', '.remove_hour', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('data-url');
+        var rowId = $(this).closest('tr').attr('id');
+        $.ajax({
+            type: 'GET',
+            url: url,
+            success: function(response) {
+                if (response.status == "success") {
+                    $('#' + rowId).remove();
+                }
+            }
+        });
+    });
 });

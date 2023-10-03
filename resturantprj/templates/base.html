@@ -50,7 +50,7 @@
 	<script src="{% static 'js/app.js' %}" ></script>
 {% endif %}
 
-
+{% if '/' == request.path  %}
 	<script src="{% static 'js/mainpage.js' %}" ></script>
-
+{% endif %}
 </html>

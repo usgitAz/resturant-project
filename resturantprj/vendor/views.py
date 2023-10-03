@@ -1,8 +1,10 @@
+from django.db import IntegrityError
 from django.shortcuts import render , get_object_or_404 , redirect
+from django.http import HttpResponse, JsonResponse
 from django.views import View
-from .forms import VendorForm
-from accounts.forms import UserProfileForm
-from .models import VendorModel
+from .forms import VendorForm , OpeningHourForm
+from accounts.forms import UserProfileForm 
+from .models import VendorModel , OpeningHourModel
 from accounts.models import UserProfileModel 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required , user_passes_test
@@ -10,6 +12,11 @@ from accounts.views import check_role_vendor
 from menu.models import CategoryModel , FooditemModel
 from menu.form import CategoryForm , FoodItemForm
 from django.template.defaultfilters import slugify
+
+
+def get_vendor(request):
+    return VendorModel.objects.get(vendoruser =request.user)
+
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def vendorprofileview(request):
@@ -196,3 +203,59 @@ def delete_food(request , pk):
     food.delete()
     messages.info(request , 'Fooditem removed')
     return redirect("fooditems_by_category" , food.category.id)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def opening_hours(request):
+    opening_hours = OpeningHourModel.objects.filter(vendor__vendoruser = request.user)
+    form = OpeningHourForm()
+    context = {
+        'form' : form ,
+        'opening_hours' : opening_hours,
+    }
+    return render(request , 'vendor/opening_hours.html' , context)
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def opening_hours_add(request):
+    # handle data and save to db
+    if request.user.is_authenticated:
+        
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" and request.method == "POST":
+            day = request.POST.get("day")
+            from_hour = request.POST.get("from_hour")
+            to_hour = request.POST.get("to_hour")
+            is_closed = request.POST.get("is_closed")
+            print(day, from_hour, to_hour, is_closed)
+            try:
+                if hour := OpeningHourModel.objects.create(
+                    vendor=get_vendor(request),
+                    day=day,
+                    from_hour=from_hour,
+                    to_hour=to_hour,
+                    is_closed=is_closed,
+                ):
+                    day = OpeningHourModel.objects.get(id=hour.id)
+                    if day.is_closed:
+                        response = {'status': 'success', 'id': hour.id, 'day':day.get_day_display(), 'is_closed':'Closed'}
+                    else:
+                        response = {'status': 'success', 'id': hour.id, 'day':day.get_day_display(), 'from_hour': hour.from_hour, 'to_hour': hour.to_hour}
+
+                return JsonResponse(response)
+
+            except IntegrityError:
+                response = {'status': 'failed', 'message':from_hour +'-'+to_hour + ' already exist for this day.'}
+                return JsonResponse(response)
+
+    else:
+        HttpResponse("Invalid Request") 
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def opening_hours_remove(request , pk):
+     if request.user.is_authenticated:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            hour = get_object_or_404(OpeningHourModel , pk=pk)
+            hour.delete()
+            return JsonResponse({'status' : 'success' , 'id' : pk})
+
+

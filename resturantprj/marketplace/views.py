@@ -1,6 +1,6 @@
 from django.shortcuts import render , redirect
 from django.contrib import messages
-from vendor.models import VendorModel
+from vendor.models import OpeningHourModel, VendorModel
 from django.shortcuts import get_object_or_404
 from menu.models import CategoryModel , FooditemModel
 from django.db.models import Prefetch
@@ -9,9 +9,12 @@ from .models import CartModel
 from .context_processors import get_cart_counter , get_cart_amounts
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
+
+from datetime import date, datetime
 
 # Create your views here.
 
@@ -34,6 +37,13 @@ def vendor_detail(request , vendor_slug):
             queryset=FooditemModel.objects.filter(is_available =True),
         )
     ) # to acsess to food item in food item model beacuse we have forigen key categort in food item  we use prefetch related
+
+    opening_hours = OpeningHourModel.objects.filter(vendor = vendor).order_by('day' , '-from_hour')
+    # check current day  to show opening hour 
+    today = date.today().isoweekday()
+    
+    current_day = OpeningHourModel.objects.filter(vendor = vendor , day = today)
+
     if request.user.is_authenticated:
          cart_items = CartModel.objects.filter(user = request.user)
     else :
@@ -42,6 +52,8 @@ def vendor_detail(request , vendor_slug):
         'vendor' : vendor,
         "categories" : categories,
         "cart_items" : cart_items,
+        'opening_hours' : opening_hours,
+        'current_day' : current_day,
     }
     return render(request , 'marketplace/vendor_detail.html', context)
 

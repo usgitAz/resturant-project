@@ -34,9 +34,10 @@ $(document).ready(function(){
                     //subtotal tax total price 
                     CartAmounts(
                         response.cart_amount['subtotal'],
-                        response.cart_amount['tax'],
+                        response.cart_amount['tax_dict'],
                         response.cart_amount['total'],
                     )
+
                 }
             }
         });
@@ -87,7 +88,7 @@ $(document).ready(function(){
                         CheckEmptyCart();
                         CartAmounts(
                             response.cart_amount['subtotal'],
-                            response.cart_amount['tax'],
+                            response.cart_amount['tax_dict'],
                             response.cart_amount['total'],
                         )
                     }
@@ -122,7 +123,7 @@ $(document).ready(function(){
                     removecartitem(0 , cart_id)
                     CartAmounts(
                         response.cart_amount['subtotal'],
-                        response.cart_amount['tax'],
+                        response.cart_amount['tax_dict'],
                         response.cart_amount['total'],
                     )
                 }
@@ -152,11 +153,18 @@ $(document).ready(function(){
 
     // cart amounts 
 
-    function CartAmounts(subtotal , tax , total){
+    function CartAmounts(subtotal , tax_dict , total){
         if(window.location.pathname == '/cart/'){
             $('#subtotal').html(subtotal)
-            $('#tax').html(tax)
             $('#total').html(total)
+            // get tax amount 
+            for(key in tax_dict){
+                //set value precentage as key and return tax amout  
+                for(value1 in tax_dict[key]){
+                    $('#tax-'+key).html(tax_dict[key][value1])
+
+                }
+            }
         }
     }
     

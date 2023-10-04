@@ -17,4 +17,5 @@ urlpatterns = [
     path('reset_password_validate/<uidb64>/<token>/' , views.reset_password_validate , name='reset_password_validate',),
     path('reset_password' , views.reset_password.as_view() , name='reset_password') ,
     path('vendor/' , include('vendor.urls')),
+    path('customers/' , include('customers.urls')),
 ]

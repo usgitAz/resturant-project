@@ -89,7 +89,7 @@ class UserProfileModel(models.Model):
     country = models.CharField(max_length=30 , blank=True , null=True)
     state = models.CharField(max_length=30 , blank=True , null=True)
     city = models.CharField(max_length=30 , blank=True , null=True)
-    latitude=models.CharField(max_length=10 , blank=True , null=True)
+    latitude=models.CharField(max_length=10 , blank=True , null=True )
     longitude = models.CharField(max_length=10 , blank=True , null=True)
     location = gismodels.PointField(blank=True , null=True , srid=4326)
     creat_at = models.DateTimeField(auto_now_add=True)

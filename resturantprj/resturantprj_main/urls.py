@@ -28,5 +28,7 @@ urlpatterns = [
     path('marketplace/' , include('marketplace.urls')),
     path('cart/' , marketplaceview.cart , name='cart'),
     path('search/' , marketplaceview.search , name='search'),
+    path('checkout/' , marketplaceview.checkout , name='checkout'),
+    path('orders/' , include('orders.urls')),
 
 ]+static(settings.MEDIA_URL , document_root=settings.MEDIA_ROOT)

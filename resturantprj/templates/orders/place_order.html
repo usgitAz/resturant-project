@@ -20,8 +20,19 @@
                                 <div class="menu-itam-holder">
 
                                     <div id="menu-item-list-6272" class="menu-itam-list">
-                                            
-                                            
+                                            <div class="billing-address">
+                                                <div><b>{{order.name}}</b></div>
+                                                <div>{{order.address}}</div>
+                                                <div>{{order.city}}  , {{order.state}}</div>
+                                                <div>{{order.country}}</div>
+                                                <div>Phone : <b>{{order.phone}}</b> </div>
+                                                <div>Email : <b>{{order.email}}</b></div>
+                                                <div>Payment : <b>{{order.payment_method}}</b></div>
+                                                <br>
+                                                <div><a href="{% url 'checkout' %}" class="btn btn-outline-danger" >Edit</a></div>
+                                                <br>
+
+                                            </div>
                                     </div>
                                  
                                 </div>
@@ -41,7 +52,21 @@
                         <div class="tab-content">
                             <div id="home" class="tab-pane in active">
                                 <div class="menu-itam-holder">
+
                                     <div>
+                                         <table class="table">
+                                         <tbody>
+                                           
+                                            {% for item in cart_items %}
+                                                <tr>
+                                                        <td> <img src="{{item.fooditem.image.url}}" width='40' alt="food image"></td>
+                                                        <td><b>{{item.fooditem}}</b></td>
+                                                        <td>{{item.quantity}}</td>
+                                                        <td>${{item.fooditem.price}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                         </tbody>
+                                        </table>
                                         <ul>
                                             <li style="list-style-type: none;" >
                                                 Subtotal
@@ -69,7 +94,10 @@
                                                     <span id="total">{{total}}</span>
                                                 </span>
                                             </li>
-                                            <a href="{% url 'checkout' %}" class="btn btn-danger w-100 p-2 mt-3 mb-3">Checout Process</a>
+                                            
+                                            {% comment %} paypal checkout button {% endcomment %}
+                                            <div id="paypal-button-container"></div>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -83,4 +111,78 @@
         </div>
     </div>
 </div>
+
+<script>
+    // take the csrftoken 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    
+    var total_price = {{total}};
+    var url = '{% url 'payments' %}';
+    var order_number = {{order.order_number}};
+    const csrftoken = getCookie('csrftoken');
+
+
+    paypal.Buttons({
+
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: total_price // Set the amount here
+                    }
+                }]
+            });
+        },
+
+        onApprove:function(data , actions){
+            return actions.order.capture().then(function(orderData) {
+                console.log(orderData);
+                var transaction = orderData.purchase_units[0].payments.captures[0];
+                var transaction_id = transaction.id;
+                var transaction_status = transaction.status; 
+                var payment_method = 'paypal';
+                SendTransaction(transaction_id , payment_method , transaction_status);
+                console.log('transaction-status : ' + transaction.status + ' transaction id : ' + transaction.id );
+            });
+        }
+
+    }).render('#paypal-button-container');
+
+    //send data to payment view to store in the database
+    function SendTransaction(transaction_id , payment_method , transaction_status){
+        $.ajax({
+            type : 'POST' ,
+            url : url ,
+            data : {
+                "order_number" : order_number,
+                "transaction_id" : transaction_id,
+                "payment_method" : payment_method,
+                "status" : transaction_status ,
+                "csrfmiddlewaretoken" : csrftoken,
+            },
+            success :function(response){
+                console.log('response =>' , response)
+
+            }
+        })
+    }
+
+</script>
+
+
 {% endblock content %}

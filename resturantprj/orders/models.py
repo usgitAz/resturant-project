@@ -6,8 +6,8 @@ from menu.models import FooditemModel
 
 class PaymentModel(models.Model):
     PAYMENT_METHOD = (
-        ('PayPal', 'PayPal'),
-        ('zarinpal' , 'zarinpal')
+        ('paypal', 'Paypal'),
+        ('pay' , 'Pay')
     )
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     transaction_id = models.CharField(max_length=100)
@@ -33,6 +33,7 @@ class OrderModel(models.Model):
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15 , blank=True)
     email = models.EmailField(max_length=50)
     address = models.CharField(max_length=200)
     country = models.CharField(max_length=15, blank=True)

@@ -1,13 +1,17 @@
+from django.http import HttpResponse
 from django.shortcuts import render , redirect
 from django.contrib import messages
 from marketplace.models import CartModel
 from marketplace.context_processors import get_cart_amounts
 from .forms import OrderForm
-from .models import OrderModel
+from .models import OrderModel, PaymentModel
 import simplejson as json
 from .utils import generate_order_number
+from django.views.decorators.csrf import csrf_protect
 # Create your views here.
 
+@csrf_protect
+#use csrf to save data in to database
 def place_order(request):  
     cart_items = CartModel.objects.filter(user = request.user  ).order_by('created_at')
     cart_count = cart_items.count()
@@ -26,6 +30,7 @@ def place_order(request):
             order = OrderModel()
             order.first_name = form.cleaned_data['first_name']
             order.last_name = form.cleaned_data['last_name']
+            order.phone = form.cleaned_data['phone']
             order.email = form.cleaned_data['email']
             order.address = form.cleaned_data['address']
             order.country = form.cleaned_data['country']
@@ -38,9 +43,48 @@ def place_order(request):
             order.payment_method = request.POST['pyment-method']
             order.order_number = generate_order_number(request.user.pk)
             order.save()
-        else :
-            print(form.errors)
+            context = {
+                'order': order ,
+                'cart_items' : cart_items ,
+            }
+            return render (request , "orders/place_order.html" , context)
+   
     else :
-        print(request.method)
+        print(form.errors)
     
     return render(request , "orders/place_order.html")
+
+
+def payments(request):
+    #check if request is ajax
+    if request.method == 'POST' or request.headers.get("x-requested-with") == "XMLHttpRrequest":
+        #get data from request
+        order_number = request.POST.get('order_number')
+        transaction_id = request.POST.get('transaction_id')
+        payment_method = request.POST.get('payment_method')
+        status = request.POST.get('status')
+        csrf = request.POST.get('csrfmiddlewaretoken')
+        #store the payment details in the payment model 
+        order = OrderModel.objects.get(user = request.user  , order_number = order_number)        
+        payment = PaymentModel.objects.create(
+            user = order.user ,
+            transaction_id = transaction_id ,
+            payment_method = payment_method ,
+            amount = order.total ,
+            status = status,
+        )
+
+        #update the order model 
+        order.payment = payment
+        order.is_ordered = True
+        order.save()
+        return HttpResponse("order Updated !")
+        #move the cart items to order food model 
+
+        #send order recived ematil to vendor 
+
+        #clear the cart if the payment is sucess 
+
+        #retirn back to ajax with status success or faild
+
+    return HttpResponse('payment view ')

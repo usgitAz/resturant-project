@@ -33,8 +33,11 @@
                                                 </div>
                                             </div>  
                                             <div class="row">
-                                                <div class="form-group col-md-12 col-sm-12 col-lg-12">
+                                                <div class="form-group col-md-6 col-sm-12 col-lg-6">
                                                     Email : {{order_form.email}}
+                                                </div> 
+                                                <div class="form-group col-md-6 col-sm-12 col-lg-6">
+                                                    Phone : {{order_form.phone}}
                                                 </div>
                                                    <div class="form-group col-md-12 col-sm-12 col-lg-12">
                                                     Address : {{order_form.address}}
@@ -118,18 +121,16 @@
                                             </li>
                                             <h5>Select Payment Method</h5>
                                             <div class="payment-method">
-                                                    <div class="pay1">
-                                                        <label>
+                                                        <label style="margin-left:5rem;">
                                                             <input type="radio" name="pyment-method" id="paypal" value="paypal">
                                                             <img src="{% static 'images/PayPal.png' %}" alt="paypal" width='100'>
                                                         </label>
-                                                    </div>
-                                                    <div class="pay2">
-                                                        <label>
-                                                            <input type="radio" name="pyment-method" id="zarinpal" value="zarinpal">
-                                                            <img src="{% static 'images/zarinpal_logo.png' %}" alt="zarinpal" width='75' >
+                                                    
+                                                        <label style="margin-left:5rem;" >
+                                                            <input type="radio" name="pyment-method" id="pay" value="pay">
+                                                            <img src="{% static 'logo/pay-ir.png' %}" alt="pay.ir" width='100' >
                                                         </label>
-                                                    </div>
+                                                    
                                             </div>
                                             <span class="text-danger" id="payment-method-error"></span>
                                             <button onclick="return paymethodconfirm();" type="submit" class="btn btn-danger w-100 p-2 mt-3 mb-3">Place Order</button>
@@ -155,6 +156,7 @@
             $('#payment-method-error').html("Select payment eror");
             return false ;
         }
+        
     }
     // clear eror message after select method
     $("input[name='pyment-method']").on('change', function(){

@@ -81,6 +81,7 @@ TEMPLATES = [
                 'accounts.contex_processors.get_vendor',
                 'marketplace.context_processors.get_cart_counter',
                 'marketplace.context_processors.get_cart_amounts',
+                'accounts.contex_processors.get_paypal_client_id',
 
             ],
         },
@@ -175,8 +176,15 @@ MESSAGE_TAGS={
 # EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = False
 
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-EMAIL_HOST_USER = '70d49938e068d7'
-EMAIL_HOST_PASSWORD = 'fc34d32881782a'
-EMAIL_PORT = '2525'
-DEFAULT_FROM_EMAIL = 'Food online marketplace <test>'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('EMAIL_PORT')
+DEFAULT_FROM_EMAIL = 'Online Resturant and food marketplace '
+
+
+PAYPAL_CLIENT_ID =config('PAYPAL_CLIENT_ID')
+
+
+# allow use popup 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'

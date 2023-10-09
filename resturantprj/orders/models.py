@@ -4,7 +4,7 @@ from accounts.models import UserModel
 from menu.models import FooditemModel
 
 
-class PaymentModel(models.Model):
+class  PaymentModel(models.Model):
     PAYMENT_METHOD = (
         ('paypal', 'Paypal'),
         ('pay' , 'Pay')

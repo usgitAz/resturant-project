@@ -1,17 +1,20 @@
-from django.http import HttpResponse
+from django.http import HttpResponse , JsonResponse
 from django.shortcuts import render , redirect
 from django.contrib import messages
 from marketplace.models import CartModel
 from marketplace.context_processors import get_cart_amounts
 from .forms import OrderForm
-from .models import OrderModel, PaymentModel
+from .models import OrderModel, OrderedFoodModel, PaymentModel
 import simplejson as json
 from .utils import generate_order_number
 from django.views.decorators.csrf import csrf_protect
+from accounts.Utils import send_notification_email
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-@csrf_protect
-#use csrf to save data in to database
+
+
+@login_required(login_url="login")
 def place_order(request):  
     cart_items = CartModel.objects.filter(user = request.user  ).order_by('created_at')
     cart_count = cart_items.count()
@@ -54,7 +57,7 @@ def place_order(request):
     
     return render(request , "orders/place_order.html")
 
-
+@login_required(login_url="login")
 def payments(request):
     #check if request is ajax
     if request.method == 'POST' or request.headers.get("x-requested-with") == "XMLHttpRrequest":
@@ -78,13 +81,81 @@ def payments(request):
         order.payment = payment
         order.is_ordered = True
         order.save()
-        return HttpResponse("order Updated !")
-        #move the cart items to order food model 
 
-        #send order recived ematil to vendor 
+        #move the cart items to order food model 
+        cart_items = CartModel.objects.filter(user = request.user)
+        for item in cart_items :
+            orderred_food = OrderedFoodModel()
+            orderred_food.order = order
+            orderred_food.payment = payment
+            orderred_food.user = request.user
+            orderred_food.fooditem = item.fooditem
+            orderred_food.quantity = item.quantity
+            orderred_food.price = item.fooditem.price
+            orderred_food.amount = item.fooditem.price * item.quantity # total amount
+            orderred_food.save()
+            
+        
+
+
+        #send order recived email to customer 
+        mail_subject = 'Thanks for ordering with us .'
+        mail_template =  'orders/emails/order_email_confirmation.html'
+        context = {
+            'user' : request.user , 
+            'order' : order,
+            'to_email' : order.email,
+        }
+        send_notification_email(mail_subject , mail_template , context)
+
+        #send order recived email to vendors
+        mail_subject = "You have recived a new order ."
+        mail_template = "orders/emails/recived_order_to_vendor.html"
+        to_eamils = []
+        for i in cart_items :
+            if i.fooditem.vendor.vendoruser.email not in to_eamils: #just 1 uniq address we need in list 
+                to_eamils.append(i.fooditem.vendor.vendoruser.email)
+        print(to_eamils)
+        context={
+            'order' : order ,
+            'to_email' : to_eamils ,
+        }
+
+        send_notification_email(mail_subject , mail_template , context)
+
 
         #clear the cart if the payment is sucess 
-
+        cart_items.delete()
+        response = {
+            'order_number' : order_number ,
+            'transaction_id' : transaction_id,
+        }
+        return JsonResponse(response)
         #retirn back to ajax with status success or faild
 
     return HttpResponse('payment view ')
+
+
+def order_complate(request):
+    order_number = request.GET.get('order_number')
+    transaction_id = request.GET.get('transaction_id')
+    try :
+        order = OrderModel.objects.get(order_number=order_number , payment__transaction_id = transaction_id , is_ordered=True )
+        ordered_food = OrderedFoodModel.objects.filter(order = order)
+
+        subtotal = 0
+        for item in ordered_food :
+            subtotal += (item.price * item.quantity)
+
+        tax_data = json.loads(order.tax_data)
+        print(tax_data)
+        context ={
+            'order' : order,
+            'ordered_food' : ordered_food,
+            'subtotal' : subtotal,
+            'tax_data' : tax_data,
+        }
+        return render (request , 'orders/order_complate.html' , context)
+    except:
+        return redirect('mainpage')
+    return render(request , "orders/order_complate.html")

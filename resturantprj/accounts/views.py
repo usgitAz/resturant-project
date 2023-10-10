@@ -2,6 +2,7 @@ from django.shortcuts import render , redirect
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.views import View
+from orders.models import OrderModel
 from .forms import UserForm
 from .models import UserModel , UserProfileModel
 from vendor.forms import VendorForm
@@ -163,7 +164,14 @@ def MyAccount(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_customer)
 def CDashBoard(request):
-    return render(request , 'accounts/cdashboard.html')
+    orders = OrderModel.objects.filter(user = request.user , is_ordered = True)
+    recent_orders = OrderModel.objects.filter(user = request.user , is_ordered = True).order_by('-created_at')[:5]
+    context = {
+        'orders' : orders,
+        'recent_orders' : recent_orders ,
+        'orders_count' : orders.count()
+    }
+    return render(request , 'accounts/cdashboard.html' , context)
 
 
 @login_required(login_url='login')

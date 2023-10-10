@@ -1,5 +1,5 @@
 {% load static %}
-<div class="page-section restaurant-detail-image-section" style=" background: url({% if profile.cover_picture  %} {{profile.cover_picture.url}} {% else %}{% static 'images/default-cover.PNG' %}{% endif %}) no-repeat scroll 0 0 / cover;">
+<div class="page-section restaurant-detail-image-section" style=" background: url({% if user_profile.cover_picture  %} {{user_profile.cover_picture.url}} {% else %}{% static 'images/default-cover.PNG' %}{% endif %}) no-repeat scroll 0 0 / cover;">
     <!-- Container Start -->
     <div class="container">
         <!-- Row Start -->
@@ -10,7 +10,7 @@
                     <div class="company-info">
                         <div class="img-holder">
                             <figure>
-                                <img src="{% if profile.profile_picture %} {{profile.profile_picture.url}} {% else %}{% static 'extra-images/listing-logo18.png' %}{% endif %}" alt="">
+                                <img src="{% if user_profile.profile_picture %} {{user_profile.profile_picture.url}} {% else %}{% static 'extra-images/listing-logo18.png' %}{% endif %}" alt="">
                             </figure>
                         </div>
 
@@ -18,7 +18,11 @@
                             <span class="restaurant-title">{{user.first_name}}</span>
                             <div class="text">
                                 <i class="icon-location"></i>
-                                <p>{% if profile.address %}{{profile.address}}{% else %}  {% endif %}</p>
+                                <p>{% if user_profile.address %} {{user_profile.address}} {% endif %}</p>
+                            </div>
+                            <div class="text">
+                                <i class="icon-email"></i>
+                                <p>{% if user.email %} {{user.email}} {% endif %}</p>
                             </div>
                         </div>
                     </div>

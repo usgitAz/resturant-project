@@ -19,6 +19,7 @@ def get_cart_counter(request):
 
 
 def get_cart_amounts(request):
+    toman = 0
     subtotal = 0 
     tax = 0
     total = 0

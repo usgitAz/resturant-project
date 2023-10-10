@@ -96,7 +96,18 @@
                                             </li>
                                             
                                             {% comment %} paypal checkout button {% endcomment %}
+                                            {% if order.payment_method == "paypal" %}
                                             <div id="paypal-button-container"></div>
+                                            {% elif order.payment_method == "pay" %}
+                                            <li style="list-style-type: none; font-weight:600;" >
+                                                Toman : 
+                                                <span class="price float-right">
+                                                    <span class="currency"></span>
+                                                    <span id="total">{{toman}}</span>
+                                                </span>
+                                            </li>
+                                            <button class="btn btn-info w-100 mt-1 mb-1" id="paybutton">pay with Pay </button>
+                                            {% endif %}
 
                                         </ul>
                                     </div>
@@ -112,83 +123,147 @@
     </div>
 </div>
 
-<script>
-    // take the csrftoken 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+{% if order.payment_method == "paypal" %}
+    <script>
+        // take the csrftoken 
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
-        }
-        return cookieValue;
-    }
-
-    
-    var total_price = {{total}};
-    var url = '{% url 'payments' %}';
-    var order_number = {{order.order_number}};
-    const csrftoken = getCookie('csrftoken');
-    var order_complate = "{% url 'order_complate' %}" 
-
-
-    paypal.Buttons({
-
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: total_price // Set the amount here
-                    }
-                }]
-            });
-        },
-
-        onApprove:function(data , actions){
-            return actions.order.capture().then(function(orderData) {
-                console.log(orderData);
-                var transaction = orderData.purchase_units[0].payments.captures[0];
-                var transaction_id = transaction.id;
-                var transaction_status = transaction.status; 
-                var payment_method = 'paypal';
-                SendTransaction(transaction_id , payment_method , transaction_status);
-                console.log('transaction-status : ' + transaction.status + ' transaction id : ' + transaction.id );
-
-                const element = document.getElementById('paypal-button-container');
-                element.innerHTML = '' ;
-                element.innerHTML = '<h3 class="tex-center"><i class="fa fa-spinner fa-spin"></i>Please Wait !...</h3>' 
-
-            });
+            return cookieValue;
         }
 
-    }).render('#paypal-button-container');
+        
+        var total_price = {{total}};
+        var url = '{% url 'payments' %}';
+        var order_number = {{order.order_number}};
+        const csrftoken = getCookie('csrftoken');
+        var order_complate = "{% url 'order_complate' %}" 
 
-    //send data to payment view to store in the database
-    function SendTransaction(transaction_id , payment_method , transaction_status){
-        $.ajax({
-            type : 'POST' ,
-            url : url ,
-            data : {
-                "order_number" : order_number,
-                "transaction_id" : transaction_id,
-                "payment_method" : payment_method,
-                "status" : transaction_status ,
-                "csrfmiddlewaretoken" : csrftoken,
+
+        paypal.Buttons({
+
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: total_price // Set the amount here
+                        }
+                    }]
+                });
             },
-            success :function(response){
-                console.log('response =>' , response)
-                window.location.href = order_complate + '?order_number='+response.order_number+'&transaction_id='+response.transaction_id ;
-            }
-        })
-    }
 
-</script>
+            onApprove:function(data , actions){
+                return actions.order.capture().then(function(orderData) {
+                    console.log(orderData);
+                    var transaction = orderData.purchase_units[0].payments.captures[0];
+                    var transaction_id = transaction.id;
+                    var transaction_status = transaction.status; 
+                    var payment_method = 'paypal';
+                    SendTransaction(transaction_id , payment_method , transaction_status);
+                    console.log('transaction-status : ' + transaction.status + ' transaction id : ' + transaction.id );
+
+                    const element = document.getElementById('paypal-button-container');
+                    element.innerHTML = '' ;
+                    element.innerHTML = '<h3 class="tex-center"><i class="fa fa-spinner fa-spin"></i>Please Wait !...</h3>' 
+
+                });
+            }
+
+        }).render('#paypal-button-container');
+
+        //send data to payment view to store in the database
+        function SendTransaction(transaction_id , payment_method , transaction_status){
+            $.ajax({
+                type : 'POST' ,
+                url : url ,
+                data : {
+                    "order_number" : order_number,
+                    "transaction_id" : transaction_id,
+                    "payment_method" : payment_method,
+                    "status" : transaction_status ,
+                    "csrfmiddlewaretoken" : csrftoken,
+                },
+                success :function(response){
+                    console.log('response =>' , response)
+                    window.location.href = order_complate + '?order_number='+response.order_number+'&transaction_id='+response.transaction_id ;
+                }
+            })
+        }
+
+    </script>
+
+{% elif order.payment_method == "pay" %}
+
+    <script>
+        // take the csrftoken 
+        function getCookie(name) {
+        let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const paybutton = document.getElementById('paybutton');
+
+        paybutton.addEventListener('click' , test);
+
+        var total_price = {{total}} *50000 ;
+        var url = '{% url 'payments' %}';
+        const csrftoken = getCookie('csrftoken');
+        var order_complate = "{% url 'order_complate' %}" 
+        const domain = window.location.host;  
+        let redirect_url = domain + '{% url 'verify_pay' %}' ;
+        var factorNumber = "{{order.order_number}}";
+        var mobile = "{{order.phone}}"
+        let send_url = `https://pay.ir/pg/send?api=test&amount=${total_price}&redirect=${redirect_url}&factorNumber=${factorNumber}&mobile=${mobile}`;
+        let buy_page = "https://pay.ir/pg/";
+        let verify_url = "https://pay.ir/pg/verify?";
+        function test(){
+            console.log(send_url);
+            fetch(send_url, { method: 'POST' })
+                .then(response => {
+                    console.log(response);
+                    if (response.status === 200) {
+                        return response.json();
+                    }
+                    throw new Error('Request failed');
+                })
+                .then(data => {
+                    console.log(data);
+                    if (data.status === 1) {
+                        let token = data.token;
+                        window.location.href = buy_page + token;
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    // Handle error accordingly
+                });
+        }
+        
+
+    </script>
+
+
+{% endif %}
 
 
 {% endblock content %}

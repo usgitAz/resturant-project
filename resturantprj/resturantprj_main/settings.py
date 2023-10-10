@@ -188,3 +188,6 @@ PAYPAL_CLIENT_ID =config('PAYPAL_CLIENT_ID')
 
 # allow use popup 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
+PAY_API = 'test'
+PAY_REDIRECT = '127.0.0.1:8000/orders/verify_pay'

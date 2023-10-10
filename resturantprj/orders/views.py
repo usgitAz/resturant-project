@@ -1,4 +1,6 @@
-from django.http import HttpResponse , JsonResponse
+from django.http import HttpResponse , JsonResponse , HttpResponseRedirect
+from django.urls import reverse
+import requests
 from django.shortcuts import render , redirect
 from django.contrib import messages
 from marketplace.models import CartModel
@@ -10,6 +12,7 @@ from .utils import generate_order_number
 from django.views.decorators.csrf import csrf_protect
 from accounts.Utils import send_notification_email
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 # Create your views here.
 
 
@@ -52,10 +55,94 @@ def place_order(request):
             }
             return render (request , "orders/place_order.html" , context)
    
-    else :
-        print(form.errors)
+        else :
+            print(form.errors)
     
     return render(request , "orders/place_order.html")
+
+
+@login_required(login_url="login")
+def verify_pay(request):
+        transaction_status = request.GET.get('status')
+        token = request.GET.get('token')
+        if transaction_status == '1':
+            api = "test"
+            t = str(token)
+            verify_url = f"https://pay.ir/pg/verify?api={api}&token={t}" 
+            send_verify = requests.post(verify_url)
+            if send_verify.status_code == 200 :
+                data = json.loads(json.dumps(send_verify.json()))
+                amount = data['amount']
+                factor_number = data['factorNumber']
+                mobile = data['mobile']
+                trans_id = data['transId']
+               #store the payment details in the payment model 
+                order = OrderModel.objects.get(user = request.user  , order_number = factor_number)        
+                payment = PaymentModel.objects.create(
+                    user = order.user ,
+                    transaction_id = trans_id ,
+                    payment_method = 'pay' ,
+                    amount = amount ,
+                    status = 'COMPLATE',
+                )
+                #update order model
+                order.payment = payment
+                order.is_ordered = True
+                order.save()
+
+                #move the cart items to order food model 
+                cart_items = CartModel.objects.filter(user = request.user)
+                for item in cart_items :
+                    orderred_food = OrderedFoodModel()
+                    orderred_food.order = order
+                    orderred_food.payment = payment
+                    orderred_food.user = request.user
+                    orderred_food.fooditem = item.fooditem
+                    orderred_food.quantity = item.quantity
+                    orderred_food.price = item.fooditem.price
+                    orderred_food.amount = item.fooditem.price * item.quantity # total amount
+                    orderred_food.save()
+                 
+                #send order recived email to customer 
+                mail_subject = 'Thanks for ordering with us .'
+                mail_template =  'orders/emails/order_email_confirmation.html'
+                context = {
+                    'user' : request.user , 
+                    'order' : order,
+                    'to_email' : order.email,
+                }
+                send_notification_email(mail_subject , mail_template , context)
+
+                #send order recived email to vendors
+                mail_subject = "You have recived a new order ."
+                mail_template = "orders/emails/recived_order_to_vendor.html"
+                to_eamils = []
+                for i in cart_items :
+                    if i.fooditem.vendor.vendoruser.email not in to_eamils: #just 1 uniq address we need in list 
+                        to_eamils.append(i.fooditem.vendor.vendoruser.email)
+                context={
+                    'order' : order ,
+                    'to_email' : to_eamils ,
+                }
+
+                send_notification_email(mail_subject , mail_template , context)
+
+                # clear the cart if the payment is sucess 
+                cart_items.delete()
+                response = {
+                    'order_number' : factor_number ,
+                    'transaction_id' : trans_id,
+                }
+                url = '/orders/order_complate?order_number={}&transaction_id={}'.format(response['order_number'], response['transaction_id'])
+                return redirect(url)
+    
+            else :
+                messages.error(request , 'buy_faild!!! please try again')
+                return HttpResponse('faild2')
+        else :
+            messages.error(request , 'buy_faild!!! please try again')
+            return HttpResponse ('faild1')
+
 
 @login_required(login_url="login")
 def payments(request):
@@ -95,7 +182,7 @@ def payments(request):
             orderred_food.amount = item.fooditem.price * item.quantity # total amount
             orderred_food.save()
             
-        
+    
 
 
         #send order recived email to customer 
@@ -115,7 +202,7 @@ def payments(request):
         for i in cart_items :
             if i.fooditem.vendor.vendoruser.email not in to_eamils: #just 1 uniq address we need in list 
                 to_eamils.append(i.fooditem.vendor.vendoruser.email)
-        print(to_eamils)
+
         context={
             'order' : order ,
             'to_email' : to_eamils ,
@@ -148,7 +235,6 @@ def order_complate(request):
             subtotal += (item.price * item.quantity)
 
         tax_data = json.loads(order.tax_data)
-        print(tax_data)
         context ={
             'order' : order,
             'ordered_food' : ordered_food,
@@ -158,4 +244,4 @@ def order_complate(request):
         return render (request , 'orders/order_complate.html' , context)
     except:
         return redirect('mainpage')
-    return render(request , "orders/order_complate.html")
+    

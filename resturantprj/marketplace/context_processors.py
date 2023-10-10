@@ -45,5 +45,6 @@ def get_cart_amounts(request):
         
     
         total = subtotal + tax
-    return dict(subtotal = subtotal , tax = tax , total = total , tax_dict = tax_dict)
+        toman = int( total * 50000)
+    return dict(subtotal = subtotal , tax = tax , total = total , tax_dict = tax_dict , toman=toman)
 

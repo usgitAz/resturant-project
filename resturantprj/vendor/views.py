@@ -2,16 +2,19 @@ from django.db import IntegrityError
 from django.shortcuts import render , get_object_or_404 , redirect
 from django.http import HttpResponse, JsonResponse
 from django.views import View
+from orders.models import OrderModel, OrderedFoodModel
 from .forms import VendorForm , OpeningHourForm
 from accounts.forms import UserProfileForm 
 from .models import VendorModel , OpeningHourModel
 from accounts.models import UserProfileModel 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required , user_passes_test
+from django.contrib.auth.decorators import login_required , user_passes_test 
 from accounts.views import check_role_vendor
 from menu.models import CategoryModel , FooditemModel
 from menu.form import CategoryForm , FoodItemForm
 from django.template.defaultfilters import slugify
+from django.contrib.auth import authenticate , login
+from django.utils.decorators import method_decorator
 
 
 def get_vendor(request):
@@ -259,3 +262,58 @@ def opening_hours_remove(request , pk):
             return JsonResponse({'status' : 'success' , 'id' : pk})
 
 
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def order_detail(request , order_number):
+    try:
+        order = OrderModel.objects.get(order_number = order_number , is_ordered = True)
+        ordered_food = OrderedFoodModel.objects.filter(order = order , fooditem__vendor = get_vendor(request))
+        context = {
+            'order':order , 
+            'ordered_food' : ordered_food ,
+            'subtotal' : order.get_total_by_vendor()['subtotal'],
+            'tax_data' : order.get_total_by_vendor()['tax_dict'],
+            'total' : order.get_total_by_vendor()['total'],
+        }
+    except :
+        messages.error(request, 'eror detail order not found !')
+        return redirect('vendor')
+    return render(request , 'vendor/order_detail.html' , context)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def orders(request):
+    vendor = VendorModel.objects.get(vendoruser = request.user)
+    orders = OrderModel.objects.filter(vendors__in =[vendor.id], is_ordered=True).order_by('-created_at')
+    context={
+        'orders' : orders
+    }
+    return render(request , 'vendor/orders.html' , context)
+
+
+@method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator(user_passes_test(check_role_vendor) , name='dispatch')
+class change_password(View):
+    def get(self , request):
+        return render(request , "vendor/change_password.html")
+    
+    def post(self , request):
+        old_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        verify_password = request.POST['verify_password']
+        
+        user = authenticate(email=request.user.email , password = old_password)
+        
+        if user is not None:
+            if new_password == verify_password:
+                user.set_password(new_password)
+                user.save()
+                login(request, user)
+                messages.success(request , "your password changed successfully!")
+                return redirect('VDashBoard')
+            else:
+                messages.error(request , "New Password not match ! try again .")
+                return render(request, 'vendor/change_password.html')
+        else:
+            messages.error(request , 'Invalid Old Password try again !')
+            return render(request, 'vendor/change_password.html')

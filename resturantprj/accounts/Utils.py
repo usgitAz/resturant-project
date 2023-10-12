@@ -14,7 +14,7 @@ def DetectUser(user):
     elif user.role is None and user.is_admin:
         return "/admin"
     
-# check permission to visit Customer dashboard or vendor dash board  
+# check permission to visit Customer dashboard or vendor dashboard  
 
 def check_role_customer(user):
     if user.role == 2:

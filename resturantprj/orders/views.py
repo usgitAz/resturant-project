@@ -3,8 +3,9 @@ from django.urls import reverse
 import requests
 from django.shortcuts import render , redirect
 from django.contrib import messages
-from marketplace.models import CartModel
+from marketplace.models import CartModel, Taxmodel
 from marketplace.context_processors import get_cart_amounts
+from menu.models import FooditemModel
 from .forms import OrderForm
 from .models import OrderModel, OrderedFoodModel, PaymentModel
 import simplejson as json
@@ -24,7 +25,44 @@ def place_order(request):
     if cart_count <= 0 :       
         messages.info(request , "you dont have any selected product first add somting food !")
         return redirect('marketplace')
-    
+    #Store paid fooditem from each restaurant in vendors filed(many to many)
+    vendors_ids =[]
+    for i in cart_items:
+        if i.fooditem.vendor.id not in vendors_ids:
+            vendors_ids.append(i.fooditem.vendor.id)
+
+    #calculate subtotal data for each vendor like:
+    #{vendor_id: {'subtotal': "{'tax_type: {'tax_percentage': 'tax_amount'}}"}}
+    #{6: {'48.00': "{'EVAT': {'9.00': '4.32'}}"}}
+    get_tax = Taxmodel.objects.filter(is_active = True)
+    subtotal = 0
+    total_data = {}
+    total_json = {}
+    for i in cart_items :
+        #calculate subtotal for each vendor
+        fooditem = FooditemModel.objects.get(pk = i.fooditem.id , vendor_id__in = vendors_ids)
+        vendorid = fooditem.vendor.id
+        if vendorid in total_json :
+            subtotal = total_json[vendorid]
+            subtotal += (fooditem.price * i.quantity)    
+            total_json[vendorid] = subtotal
+
+        else :
+            subtotal = (fooditem.price * i.quantity)    
+            total_json[vendorid] = subtotal
+        #calculate tax data
+        tax_dict = {}
+        for i in get_tax :
+            tax_type = i.tax_type
+            tax_percentage = i.tax_percentage
+            tax_amount = round((i.tax_percentage * subtotal)/100 , 2) #get tax amount by total price * tax precent /100 
+            tax_dict.update({tax_type : {str(tax_percentage) : str(tax_amount)}})
+        #construct total data 
+        total_data.update({fooditem.vendor.id:{str(subtotal):str(tax_dict)}})
+
+
+
+
     subtotal = get_cart_amounts(request)['subtotal']
     tax = get_cart_amounts(request)['tax']
     total = get_cart_amounts(request)['total']
@@ -46,9 +84,11 @@ def place_order(request):
             order.total = total
             order.total_tax = tax
             order.tax_data = json.dumps(tax_data)
+            order.total_data = json.dumps(total_data)
             order.payment_method = request.POST['pyment-method']
             order.order_number = generate_order_number(request.user.pk)
             order.save()
+            order.vendors.add(*vendors_ids)
             context = {
                 'order': order ,
                 'cart_items' : cart_items ,
@@ -85,10 +125,18 @@ def verify_pay(request):
                     amount = amount ,
                     status = 'COMPLATE',
                 )
+                cart_items = CartModel.objects.filter(user = request.user  ).order_by('created_at')
+                #Store paid fooditem from each restaurant in vendors filed(many to many)
+                vendors_ids =[]
+                for i in cart_items:
+                    if i.fooditem.vendor.id not in vendors_ids:
+                        vendors_ids.append(i.fooditem.vendor.id)
+                    
                 #update order model
                 order.payment = payment
                 order.is_ordered = True
                 order.save()
+                order.vendors.add(*vendors_ids)
 
                 #move the cart items to order food model 
                 cart_items = CartModel.objects.filter(user = request.user)

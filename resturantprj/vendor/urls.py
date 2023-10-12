@@ -16,7 +16,9 @@ urlpatterns = [
     path('opening_hours/' , views.opening_hours , name='opening_hours'),
     path('opening_hours/add/' , views.opening_hours_add , name='opening_hours_add'),
     path('opening_hours/remove/<int:pk>/' , views.opening_hours_remove , name='opening_hours_remove'),
-
-
+    path('order_detail/<int:order_number>/', views.order_detail , name='vendor_order_detail'),
+    path('orders' , views.orders , name='vendor_orders' ),
+    path('change_password/', views.change_password.as_view() , name='vendor_change_password')
+     
 
 ]

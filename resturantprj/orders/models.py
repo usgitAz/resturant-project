@@ -1,8 +1,12 @@
+import json
 from django.db import models
 from django.db import models
 from accounts.models import UserModel
 from menu.models import FooditemModel
+from vendor.models import VendorModel
 
+# request_object middleware 
+request_object = ''
 
 class  PaymentModel(models.Model):
     PAYMENT_METHOD = (
@@ -30,6 +34,7 @@ class OrderModel(models.Model):
 
     user = models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey(PaymentModel, on_delete=models.SET_NULL, blank=True, null=True)
+    vendors = models.ManyToManyField(VendorModel , blank=True)
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -40,7 +45,8 @@ class OrderModel(models.Model):
     state = models.CharField(max_length=15, blank=True)
     city = models.CharField(max_length=50)
     total = models.FloatField()
-    tax_data = models.JSONField(blank=True, help_text = "Data format: {'tax_type':{'tax_percentage':'tax_amount'}}")
+    tax_data = models.JSONField(blank=True, help_text = "Data format: {'tax_type':{'tax_percentage':'tax_amount'}}", null=True)
+    total_data = models.JSONField(blank=True, null=True)
     total_tax = models.FloatField()
     payment_method = models.CharField(max_length=25)
     status = models.CharField(max_length=15, choices=STATUS, default='New')
@@ -52,6 +58,39 @@ class OrderModel(models.Model):
     @property
     def name(self):
         return f'{self.first_name} {self.last_name}'
+    
+    def order_placed_to(self):
+        return " , ".join([str(i) for i in self.vendors.all()])
+    
+    def get_total_by_vendor (self ):
+        vendor = VendorModel.objects.get(vendoruser = request_object.user)
+        sunbtotal = 0
+        tax = 0
+        tax_dict = {}
+        if self.total_data :
+            total_data = json.loads(self.total_data)
+            data = total_data.get(str(vendor.id))
+            
+            #calc data to 
+            for key , value in data.items() :
+                sunbtotal += float(key)
+                value = value.replace("'" , '"')
+                value = json.loads(value)
+                tax_dict.update(value)
+
+                #calc tax
+                #EVAT': {'9.00': '8.64'}}
+                for i in value :
+                    for j in value[i] :
+                        tax = float(value[i][j]) #ex: 4.32 
+        total =  float(sunbtotal) + float(tax)                      
+        context = {
+            'subtotal' : sunbtotal ,
+            'total' : total , 
+            'tax_dict' : tax_dict 
+        }
+        return context
+
 
     def __str__(self):
         return self.order_number

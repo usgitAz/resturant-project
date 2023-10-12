@@ -9,7 +9,7 @@ class OrderedFoodInline(admin.TabularInline): #for show information with tablure
     readonly_fields = ('order' , 'payment' , 'user' , 'fooditem' , "quantity" , "price" ,"amount")
 
 class OrederAdmin(admin.ModelAdmin):
-    list_display = ['order_number' , 'name' ,'phone', 'email' , 'total' , 'payment_method' , 'status' , 'is_ordered']
+    list_display = ['order_number' , 'name' ,'phone', 'email' , 'total' , 'payment_method' , 'status' , 'order_placed_to' , 'is_ordered']
     inlines = [OrderedFoodInline]
 
 

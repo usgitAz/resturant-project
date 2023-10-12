@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}My Orders{% endblock title %}
+{% block title %}Orders{% endblock title %}
 {% load static %}
 {% block content %}
 {% include 'includes/alert.html' %}
 
 <div class="main-section">
-			{% include 'customers/cover.html' %}
+			{% include 'includes/cover.html' %}
 			<div class="page-section account-header buyer-logged-in">
 				<div class="container">
 					<div class="row">
 						<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-							{% include 'includes/C-sidebar.html' %}
+							{% include 'includes/V-sidebar.html' %}
 						</div>
 						<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
 							<div class="user-dashboard loader-holder">
@@ -24,7 +24,7 @@
 														<thead>
 														  <tr>
 															<th scope="col">Order</th>
-															<th scope="col">Name</th>
+															<th scope="col">Buyer Name</th>
 															<th scope="col">Total</th>
 															<th scope="col">Date</th>
 															<th scope="col">Action</th>
@@ -35,9 +35,9 @@
 															<tr>
 																<td>{{order.order_number}}</td>
 																<td>{{order.name}}</td>
-																<td>${{order.total}}</td>
+																<td>${{order.get_total_by_vendor.total}}</td>
 																<td>{{order.created_at}}</td>
-																<td><a href="{% url 'order_detail' order.order_number %}" class="btn btn-danger">Detail</a></td>
+																<td><a href="{% url 'vendor_order_detail' order.order_number %}" class="btn btn-danger">Detail</a></td>
 															</tr>
 														{% endfor %}
 														

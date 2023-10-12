@@ -56,7 +56,6 @@
 															<th scope="col">Order</th>
 															<th scope="col">Name</th>
 															<th scope="col">Total</th>
-															<th scope="col">Status</th>
 															<th scope="col">Date</th>
 															<th scope="col">Action</th>
 														  </tr>
@@ -67,7 +66,6 @@
 																<td>{{order.order_number}}</td>
 																<td>{{order.name}}</td>
 																<td>${{order.total}}</td>
-																<td>{{order.status}}</td>
 																<td>{{order.created_at}}</td>
 																<td><a href="{% url 'order_detail' order.order_number %}" class="btn btn-danger">Detail</a></td>
 															</tr>

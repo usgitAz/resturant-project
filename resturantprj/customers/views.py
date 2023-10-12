@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404, render , redirect
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required , user_passes_test
+from django.utils.decorators import method_decorator
 from django.views import View
+from accounts.Utils import check_role_customer , check_role_vendor
 from accounts.forms import UserProfileForm , UserInforForm
 from accounts.models import UserProfileModel
 from django.contrib import messages
@@ -47,6 +49,7 @@ def my_orders(request):
     return render(request , 'customers/my_orders.html' , context)
 
 @login_required(login_url='login')
+@user_passes_test(check_role_customer)
 def order_detail(request , order_number):
     try :
         order = OrderModel.objects.get(order_number = order_number , is_ordered = True)
@@ -65,8 +68,8 @@ def order_detail(request , order_number):
     except:
         messages.error(request , 'invalid order number !')
         return redirect('CDashBoard')
-
-
+@method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator(user_passes_test(check_role_customer) , name='dispatch')
 class change_password(View):
 
     def get(self , request):

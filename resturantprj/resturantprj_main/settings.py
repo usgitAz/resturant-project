@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'orders.request_object.request_object_middleware' #custom middleware to acsess request object in orders/models.py
 ]
 
 ROOT_URLCONF = 'resturantprj_main.urls'

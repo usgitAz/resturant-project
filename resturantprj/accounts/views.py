@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render , redirect
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
@@ -87,7 +88,6 @@ class RegisterVendorView(View):
             vendor = vendorform.save(commit=False)
             vendor.vendoruser = user
             get_vendor_username =form.cleaned_data['username']
-            print(get_vendor_username)
             vendor.vendor_slug = slugify(get_vendor_username)
             userprofile = UserProfileModel.objects.get(user = user)
             vendor.vendor_profile = userprofile
@@ -178,8 +178,27 @@ def CDashBoard(request):
 @user_passes_test(check_role_vendor)
 def VDashBoard(request):
     vendor = VendorModel.objects.get(vendoruser = request.user)
+    orders = OrderModel.objects.filter(vendors__in =[vendor.id], is_ordered=True).order_by('-created_at')
+    recent_orders = orders[:5]
+
+    #current month revenure
+    current_month = datetime.datetime.now().month
+    current_month_orders = orders.filter(vendors__in = [vendor.id] , created_at__month = current_month)
+    
+    current_month_revenue = 0
+    for i in current_month_orders :
+        current_month_revenue += i.get_total_by_vendor()['subtotal']
+    #total revenue
+    total_revenue = 0
+    for i in orders:
+        total_revenue += i.get_total_by_vendor()['subtotal']
     context = {
-        'vendor':vendor
+        'vendor':vendor,
+        'orders':orders,
+        'orders_count' : orders.count(),
+        'recent_orders' : recent_orders,
+        'total_revone' : total_revenue,
+        'current_month_revenue' : current_month_revenue ,
     }
     return render(request , 'accounts/vdashboard.html', context)
 

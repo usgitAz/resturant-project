@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'accounts',
     'vendor',
     'menu',
@@ -193,3 +194,5 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
 PAY_API = 'test'
 PAY_REDIRECT = '127.0.0.1:8000/orders/verify_pay'
+
+SITE_ID = 1

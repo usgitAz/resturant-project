@@ -146,3 +146,23 @@ table > tbody > tr > td {
 .pay2{
   padding: 0.8rem;
 }
+
+#home .menu-itam-holder .table td  {
+	vertical-align: top;
+	border-top: 1px solid #dee2e6;
+	overflow: hidden;
+	padding: 0;
+}
+
+
+.geoapify-autocomplete-items .geoapify-autocomplete-item .address {
+  position: relative;
+}
+
+.geoapify-autocomplete-items .geoapify-autocomplete-item .address .main-part {
+  position: relative;
+}
+
+.geoapify-autocomplete-items .geoapify-autocomplete-item .address .secondary-part {
+  position: relative;
+}

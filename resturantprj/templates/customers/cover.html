@@ -16,14 +16,18 @@
 
                         <div class="text-holder">
                             <span class="restaurant-title">{{user.first_name}}</span>
-                            <div class="text">
-                                <i class="icon-location"></i>
-                                <p>{% if user_profile.address %} {{user_profile.address}} {% endif %}</p>
-                            </div>
-                            <div class="text">
-                                <i class="icon-email"></i>
-                                <p>{% if user.email %} {{user.email}} {% endif %}</p>
-                            </div>
+                            {% if user_profile.address %}
+                                <div class="text">
+                                    <i class="icon-location"></i>
+                                    <p> {{user_profile.address}} </p>
+                                </div>
+                            {% endif %}
+                            {% if user.email %}
+                                <div class="text">
+                                    <i class="icon-email"></i>
+                                    <p> {{user.email}}</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

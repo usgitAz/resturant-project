@@ -9,12 +9,12 @@ from menu.models import FooditemModel
 from .forms import OrderForm
 from .models import OrderModel, OrderedFoodModel, PaymentModel
 import simplejson as json
-from .utils import generate_order_number
+from .utils import generate_order_number , order_total_by_vendor
 from django.views.decorators.csrf import csrf_protect
 from accounts.Utils import send_notification_email
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-# Create your views here.
+from django.contrib.sites.shortcuts import get_current_site
 
 
 
@@ -154,10 +154,19 @@ def verify_pay(request):
                 #send order recived email to customer 
                 mail_subject = 'Thanks for ordering with us .'
                 mail_template =  'orders/emails/order_email_confirmation.html'
+                ordered_food = OrderedFoodModel.objects.filter(order = order)
+                tax_data = json.loads(order.tax_data)
+                customer_subtotal = 0
+                for i in ordered_food:
+                    customer_subtotal += (i.price * i .quantity)
                 context = {
                     'user' : request.user , 
                     'order' : order,
                     'to_email' : order.email,
+                    'ordered_food' : ordered_food,
+                    'domain' : get_current_site(request),
+                    'customer_subtotal' : customer_subtotal ,
+                    'tax_data' : tax_data ,
                 }
                 send_notification_email(mail_subject , mail_template , context)
 
@@ -168,12 +177,19 @@ def verify_pay(request):
                 for i in cart_items :
                     if i.fooditem.vendor.vendoruser.email not in to_eamils: #just 1 uniq address we need in list 
                         to_eamils.append(i.fooditem.vendor.vendoruser.email)
-                context={
-                    'order' : order ,
-                    'to_email' : to_eamils ,
-                }
+                        ordered_food_to_vendor = OrderedFoodModel.objects.filter(order=order , fooditem__vendor = i.fooditem.vendor)
+                        context={
+                            'order' : order ,
+                            'to_email' : i.fooditem.vendor.vendoruser.email ,
+                            'domain' : get_current_site(request),
+                            'ordered_food_vendor' : ordered_food_to_vendor,
+                            'vendor_subtotal' : order_total_by_vendor(order , i.fooditem.vendor.id)['subtotal'],
+                            'tax_data' : order_total_by_vendor(order , i.fooditem.vendor.id)['tax_dict'],
+                            'total' : order_total_by_vendor(order , i.fooditem.vendor.id)['total'],
+                            
 
-                send_notification_email(mail_subject , mail_template , context)
+                        }
+                        send_notification_email(mail_subject , mail_template , context)
 
                 # clear the cart if the payment is sucess 
                 cart_items.delete()
@@ -236,12 +252,22 @@ def payments(request):
         #send order recived email to customer 
         mail_subject = 'Thanks for ordering with us .'
         mail_template =  'orders/emails/order_email_confirmation.html'
+        ordered_food = OrderedFoodModel.objects.filter(order = order)
+        tax_data = json.loads(order.tax_data)
+        customer_subtotal = 0
+        for i in ordered_food:
+            customer_subtotal += (i.price * i .quantity)
         context = {
             'user' : request.user , 
             'order' : order,
             'to_email' : order.email,
+            'ordered_food' : ordered_food,
+            'domain' : get_current_site(request),
+            'customer_subtotal' : customer_subtotal ,
+            'tax_data' : tax_data ,
         }
         send_notification_email(mail_subject , mail_template , context)
+
 
         #send order recived email to vendors
         mail_subject = "You have recived a new order ."
@@ -250,13 +276,18 @@ def payments(request):
         for i in cart_items :
             if i.fooditem.vendor.vendoruser.email not in to_eamils: #just 1 uniq address we need in list 
                 to_eamils.append(i.fooditem.vendor.vendoruser.email)
-
-        context={
-            'order' : order ,
-            'to_email' : to_eamils ,
-        }
-
-        send_notification_email(mail_subject , mail_template , context)
+                ordered_food_to_vendor = OrderedFoodModel.objects.filter(order=order , fooditem__vendor = i.fooditem.vendor)
+                context={
+                    'order' : order ,
+                    'to_email' : i.fooditem.vendor.vendoruser.email ,
+                    'domain' : get_current_site(request),
+                    'ordered_food_vendor' : ordered_food_to_vendor,
+                    'vendor_subtotal' : order_total_by_vendor(order , i.fooditem.vendor.id)['subtotal'],
+                    'tax_data' : order_total_by_vendor(order , i.fooditem.vendor.id)['tax_dict'],
+                    'total' : order_total_by_vendor(order , i.fooditem.vendor.id)['total'],
+        
+                }
+                send_notification_email(mail_subject , mail_template , context)
 
 
         #clear the cart if the payment is sucess 

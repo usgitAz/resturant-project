@@ -2,7 +2,11 @@ from django.db import models
 from accounts.models import UserModel , UserProfileModel
 from accounts.Utils import send_notification_email
 from datetime import time , date , datetime
+from django.http import HttpRequest
+from django.contrib.sites.shortcuts import get_current_site
 # Create your models here.
+
+
 
 
 class VendorModel(models.Model):
@@ -36,16 +40,18 @@ class VendorModel(models.Model):
                     is_open = False
         return is_open
     
-    def save(self , *args, **kwargs):
+    def save(self , *args, request=None , **kwargs):
         if self.pk is not None:
             account = VendorModel.objects.get(pk=self.pk)
             if account.is_approved != self.is_approved :
                 mail_template = 'accounts/emails/admin_approval_email.html'
-
+                current_site = get_current_site(request)
+                domain = current_site.domain
                 context = {
                         'user' : self.vendoruser ,
                         'is_approved' : self.is_approved,
                         'to_email' : self.vendoruser.email,
+                        'domain' : domain ,
                     }
                 if self.is_approved == True :
                     #send email to user

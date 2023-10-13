@@ -19,4 +19,5 @@ venv.bak/
 .history
 pip-log.txt 
 pip-delete-this-directory.txt 
-
+*.png
+*.jpg
